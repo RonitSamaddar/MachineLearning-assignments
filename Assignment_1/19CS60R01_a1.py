@@ -62,12 +62,12 @@ def form_tree(index,node,cols,npdata,npclass):
 	pos,neg=get_class_count(target)
 	#print("Rows = "+str(pos)+"+, "+str(neg)+"-")
 
-	if(pos==0 or neg>=9*pos):
+	if(pos==0):
 		node.class_label="no"
 		#print("LEAF NODE!!!! Class Label = "+node.class_label)
 		return -1
 		
-	elif(neg==0 or pos>=9*neg):
+	elif(neg==0):
 		node.class_label="yes"
 		#print("LEAF NODE!!!! Class Label = "+node.class_label)
 		return 1
@@ -85,17 +85,19 @@ def form_tree(index,node,cols,npdata,npclass):
 
 			p=len(l[0])*1.0/len(rows)
 			if(p!=0):
-				E1=E1+p*-log(p,num_class)
+				E1=E1+p*-log(p,2)
 		#End of calculating E1
 
 		#calculating next Entropy
 		flag=0
-		E2=0
+		
 		maxE=-99999
 		maxattr=""
 		for attr in cols[0:len(cols)-1]:
 			col_list=get_values(attr,cols,data)
 			values=list(np.unique(list(col_list)))
+			#print(attr,values)
+			E2=0
 			if(len(values)==1):
 				continue
 			else:
@@ -103,6 +105,7 @@ def form_tree(index,node,cols,npdata,npclass):
 					val=values[j]
 					rows1=np.where(col_list==val)
 					frac=len(rows1[0])*1.0/len(rows)
+					#print("\t",attr,val,len(rows1[0]))
 					data1=data[rows1[0],:]
 					target1=target[rows1[0]]
 					s=0;
@@ -111,7 +114,7 @@ def form_tree(index,node,cols,npdata,npclass):
 						#print(attr,val,c,len(r[0]),len(rows1[0]))
 						p=len(r[0])*1.0/len(rows1[0])
 						if(p!=0):
-							s=s+p*-log(p,num_class)
+							s=s+p*-log(p,2)
 						#print(attr,val,c,len(r[0]),len(rows1[0]),p,p*-log(p,num_class))
 					s=s*frac
 					E2=E2+s
@@ -119,6 +122,7 @@ def form_tree(index,node,cols,npdata,npclass):
 					#print(val,s)
 				#print(attr,E1,E2)
 				E=E1-E2
+				#print(attr,E2)
 				if(E>maxE):
 					maxE=E
 					maxattr=attr
